@@ -26,6 +26,21 @@
                 Assert.Equal(TemplateCode, output.ToString());
             }
         }
+
+        [Fact]
+        public void EmptyTemplateOnNullLanguage_RenderNothing()
+        {
+            // arrange
+            using (var template = new Template(null, String.Empty, null))
+            using (var output = new StringWriter())
+            {
+                // act
+                template.Render(output);
+
+                // assert
+                Assert.Empty(output.ToString());
+            }
+        }
     }
 
     public class Template : IDisposable
