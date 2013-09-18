@@ -30,11 +30,13 @@
 
     public class Template : IDisposable
     {
-        private IScript script;
+        private const string CodeExpressionOpenBracket = "[%";
+
+        private readonly IScript script;
 
         public Template(IProgrammingLanguage language, string templateCode, string[] usings)
         {
-            if (!templateCode.Contains("[%"))
+            if (IsTemplateCodeLanguageIndependent(templateCode))
             {
                 this.script = new PlainTextOutputScript(templateCode);
             }
@@ -42,6 +44,11 @@
             {
                 throw new NotImplementedException();
             }
+        }
+
+        private static bool IsTemplateCodeLanguageIndependent(string templateCode)
+        {
+            return !templateCode.Contains(CodeExpressionOpenBracket);
         }
 
         public void Dispose()
