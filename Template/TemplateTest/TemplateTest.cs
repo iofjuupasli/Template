@@ -27,4 +27,59 @@
             }
         }
     }
+
+    public class Template : IDisposable
+    {
+        private IScript script;
+
+        public Template(IProgrammingLanguage language, string templateCode, string[] usings)
+        {
+            if (!templateCode.Contains("[%"))
+            {
+                this.script = new PlainTextOutputScript(templateCode);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void Dispose()
+        {
+            script.Dispose();
+        }
+
+        public void Render(TextWriter output)
+        {
+            script.Run(output);
+        }
+    }
+
+    public class PlainTextOutputScript : IScript
+    {
+        private readonly string text;
+
+        public PlainTextOutputScript(string text)
+        {
+            this.text = text;
+        }
+
+        public void Run(TextWriter output)
+        {
+            output.Write(this.text);
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    internal interface IScript : IDisposable
+    {
+        void Run(TextWriter output);
+    }
+
+    public interface IProgrammingLanguage
+    {
+    }
 }
