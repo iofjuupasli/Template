@@ -43,5 +43,20 @@
                 Assert.Empty(output.ToString());
             }
         }
+
+        public class BracketNotCorrespondingTest
+        {
+            [Fact]
+            public void OneOpenCodeBracket()
+            {
+                // arrange
+                var language = new Mock<IProgrammingLanguage>().Object;
+                const string TemplateCode = "text before [%text after";
+
+                // act and assert
+                Assert.Throws<BracketsNotCorrespondsException>(() =>
+                    new Template(language, TemplateCode, null));
+            }
+        }
     }
 }
