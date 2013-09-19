@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Text.RegularExpressions;
 
     public class Template : IDisposable
     {
@@ -15,10 +16,15 @@
             {
                 this.script = new PlainTextOutputScript(templateCode);
             }
-            if (templateCode.Contains(@"[%") && !templateCode.Contains(@"%]"))
+            if (IsBracketsNotCorresponding(templateCode))
             {
                 throw new BracketsNotCorrespondsException();
             }
+        }
+
+        private static bool IsBracketsNotCorresponding(string templateCode)
+        {
+            return Regex.IsMatch(templateCode, @"\[%(?!.*%])", RegexOptions.Multiline | RegexOptions.Singleline);
         }
 
         private static bool IsTemplateCodeLanguageIndependent(string templateCode)
