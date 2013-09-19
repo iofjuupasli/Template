@@ -8,25 +8,35 @@
     public class Template : IDisposable
     {
         private const string CodeExpressionOpenBracket = "[%";
+        private const string CodeExpressionCloseBracket = "%]";
 
         private readonly IScript script;
 
         public Template(IProgrammingLanguage language, string templateCode, string[] usings)
         {
-            if (IsTemplateCodeLanguageIndependent(templateCode))
-            {
-                this.script = new PlainTextOutputScript(templateCode);
-            }
             if (!IsBracketsCorresponding(templateCode))
             {
                 throw new BracketsNotCorrespondsException();
+            }
+
+            if (IsTemplateCodeLanguageIndependent(templateCode))
+            {
+                this.script = new PlainTextOutputScript(templateCode);
             }
         }
 
         private static bool IsBracketsCorresponding(string templateCode)
         {
-            var openBrackets = Regex.Matches(templateCode, @"\[%", RegexOptions.Singleline);
-            var closeBrackets = Regex.Matches(templateCode, @"%\]", RegexOptions.Singleline);
+            var openBrackets = Regex.Matches(
+                templateCode,
+                Regex.Escape(CodeExpressionOpenBracket),
+                RegexOptions.Singleline);
+
+            var closeBrackets = Regex.Matches(
+                templateCode,
+                Regex.Escape(CodeExpressionCloseBracket),
+                RegexOptions.Singleline);
+
             if (openBrackets.Count != closeBrackets.Count)
             {
                 return false;
@@ -38,7 +48,12 @@
 
             for (var bracketIndex = 0; bracketIndex < allBrackets.Count(); bracketIndex++)
             {
-                if (allBrackets.ElementAt(bracketIndex).Value != (bracketIndex % 2 == 0 ? "[%" : "%]"))
+                var bracket = allBrackets.ElementAt(bracketIndex).Value;
+                var correctBracket = bracketIndex % 2 == 0
+                        ? CodeExpressionOpenBracket
+                        : CodeExpressionCloseBracket;
+
+                if (bracket != correctBracket)
                 {
                     return false;
                 }
