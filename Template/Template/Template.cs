@@ -15,9 +15,9 @@
             {
                 this.script = new PlainTextOutputScript(templateCode);
             }
-            else
+            if (templateCode.Contains(@"[%") && !templateCode.Contains(@"%]"))
             {
-                throw new NotImplementedException();
+                throw new BracketsNotCorrespondsException();
             }
         }
 

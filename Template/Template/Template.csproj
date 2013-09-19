@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BracketsNotCorrespondsException.cs" />
     <Compile Include="IProgrammingLanguage.cs" />
     <Compile Include="IScript.cs" />
     <Compile Include="PlainTextOutputScript.cs" />
