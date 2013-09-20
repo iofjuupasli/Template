@@ -43,5 +43,34 @@
                 Assert.Empty(output.ToString());
             }
         }
+
+        [Fact]
+        public void TemplateWithCodeBlock_InterpretedAsCode()
+        {
+            // arrange
+            const string Code = "code";
+            var templateText = string.Format("[%{0}%]", Code);
+            var codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
+            const string ProgramStructure = "begin {0} end";
+            codeBuilderMock.Setup<string>(builder => builder.CoverAsProgram(It.IsAny<string>()))
+                           .Returns<string>(templateCode => String.Format(ProgramStructure, templateCode));
+
+            var echoLanguageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);
+            echoLanguageMock.Setup<ICodeBuilder>(language => language.GetCodeBuilder())
+                            .Returns(codeBuilderMock.Object);
+
+            echoLanguageMock.Setup<IScript>(language => language.Compile(It.IsAny<string>()))
+                            .Returns<string>(programmCode => new PlainTextOutputScript(programmCode));
+
+            // act
+            using (var template = new Template(echoLanguageMock.Object, templateText, null))
+            using (var output = new StringWriter())
+            {    
+                template.Render(output);
+
+                // assert
+                Assert.Equal(String.Format(ProgramStructure, Code), output.ToString());
+            }
+        }
     }
 }
