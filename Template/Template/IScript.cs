@@ -3,7 +3,7 @@
     using System;
     using System.IO;
 
-    internal interface IScript : IDisposable
+    public interface IScript : IDisposable
     {
         void Run(TextWriter output);
     }
