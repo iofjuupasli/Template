@@ -72,5 +72,19 @@
                 Assert.Equal(String.Format(ProgramStructure, Code), output.ToString());
             }
         }
+
+        [Fact]
+        public void LanguageNull_TemplateDependOnLanguage_ThrowException()
+        {
+            // arrange
+            const string TemplateCode = "[%code%]";
+
+            // act
+            var exception = Assert.Throws<ArgumentNullException>(() =>  
+                    new Template(null, TemplateCode, null));
+
+            // assert
+            Assert.Equal("language", exception.ParamName);   
+        }
     }
 }
