@@ -27,6 +27,11 @@
                 return;
             }
 
+            if (language == null)
+            {
+                throw new ArgumentNullException("language");
+            }
+
             this.language = language;
 
             var code = BuildCode(templateCode, language.GetCodeBuilder());
