@@ -7,6 +7,8 @@
 
     public class Template : IDisposable
     {
+        private readonly IProgrammingLanguage language;
+
         private const string CodeExpressionOpenBracket = "[%";
         private const string CodeExpressionCloseBracket = "%]";
 
@@ -22,7 +24,15 @@
             if (IsTemplateCodeLanguageIndependent(templateCode))
             {
                 this.script = new PlainTextOutputScript(templateCode);
+                return;
             }
+
+            this.language = language;
+            var codeBuilder = language.GetCodeBuilder();
+            var code = templateCode;
+            code = code.Replace("[%", string.Empty).Replace("%]", string.Empty);
+            code = codeBuilder.CoverAsProgram(code);
+            this.script = language.Compile(code);
         }
 
         private static bool IsBracketsCorresponding(string templateCode)
