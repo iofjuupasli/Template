@@ -28,11 +28,16 @@
             }
 
             this.language = language;
-            var codeBuilder = language.GetCodeBuilder();
-            var code = templateCode;
+
+            var code = BuildCode(templateCode, language.GetCodeBuilder());
+            this.script = this.language.Compile(code);
+        }
+
+        private static string BuildCode(string code, ICodeBuilder codeBuilder)
+        {
             code = code.Replace("[%", string.Empty).Replace("%]", string.Empty);
             code = codeBuilder.CoverAsProgram(code);
-            this.script = language.Compile(code);
+            return code;
         }
 
         private static bool IsBracketsCorresponding(string templateCode)
