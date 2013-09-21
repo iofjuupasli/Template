@@ -216,6 +216,49 @@
             }
         }
 
+        [Theory]
+        [InlineData("", "", "", "")]
+        [InlineData("before", "expression", "on true", "after")]
+        [InlineData("before", "", "on true", "after")]
+        [InlineData("before", "expression", "", "after")]
+        public void ConditionExpression(
+                string textBefore, string conditionExpression, string textOnTrue, string textAfter)
+        {
+            // arrange
+            var templateText = String.Format(@"{0}[%?{1}%]{2}[%?%]{3}",
+                    textBefore, conditionExpression, textOnTrue, textAfter);
+
+            const string ProgramStructure = "begin {0} end";
+            const string ConditionStructure = "if({0}){{{1}}}";
+            const string OutputStatementStructure = @"output(""{0}"");";
+            const string MethodStructure = "method{{ {0} }}";
+
+            var echoLanguage = new MockLanguageBuilder()
+                    .WithProgramWrapper(ProgramStructure)
+                    .WithMethodWrapper(MethodStructure)
+                    .WithPlainTextWrapper(OutputStatementStructure)
+                    .WithConditionWrapper(ConditionStructure)
+                    .OutputSelfCode()
+                    .GetObject();
+
+            // act
+            using (var template = new Template(echoLanguage, templateText, null))
+            using (var output = new StringWriter())
+            {
+                template.Render(output);
+                var onTrue = (String.IsNullOrEmpty(textOnTrue) ? "" : String.Format(OutputStatementStructure, textOnTrue));
+                // assert
+                var body = (String.IsNullOrEmpty(textBefore) ? "" : String.Format(OutputStatementStructure, textBefore))
+                        + (String.IsNullOrEmpty(conditionExpression) || String.IsNullOrEmpty(onTrue) ? "" : String.Format(ConditionStructure, conditionExpression, onTrue))
+                        + (String.IsNullOrEmpty(textAfter) ? "" : String.Format(OutputStatementStructure, textAfter));
+
+                var method = String.Format(MethodStructure, body);
+                var code = String.Format(ProgramStructure, method);
+
+                Assert.Equal(code, output.ToString());
+            }
+        }
+
         private class MockLanguageBuilder
         {
             private readonly Mock<IProgrammingLanguage> languageMock;
