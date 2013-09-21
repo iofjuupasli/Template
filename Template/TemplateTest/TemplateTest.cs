@@ -173,7 +173,45 @@
             }
         }
 
+        [Theory]
+        [InlineData("", "", "", "")]
+        public void RepeatExpression(
+                string textBefore, string repeatCountExpression, string textToRepeat, string textAfter)
+        {
+            // arrange
+            var templateText = String.Format(@"{0}[%@{1}%]{2}[%@%]{3}",
+                    textBefore, repeatCountExpression, textToRepeat, textAfter);
 
+            const string ProgramStructure = "begin {0} end";
+            const string RepeatStructure = "for(var i = 0; i < {0}; i++){{{1}}}";
+            const string OutputStatementStructure = @"output(""{0}"");";
+            const string MethodStructure = "method{{ {0} }}";
+
+            var echoLanguage = new MockLanguageBuilder()
+                    .WithProgramWrapper(ProgramStructure)
+                    .WithMethodWrapper(MethodStructure)
+                    .WithPlainTextWrapper(OutputStatementStructure)
+                    .WithRepeatWrapper(RepeatStructure)
+                    .OutputSelfCode()
+                    .GetObject();
+
+            // act
+            using (var template = new Template(echoLanguage, templateText, null))
+            using (var output = new StringWriter())
+            {
+                template.Render(output);
+
+                // assert
+                var body = (String.IsNullOrEmpty(textBefore) ? "" : String.Format(OutputStatementStructure, textBefore))
+                        + (String.IsNullOrEmpty(repeatCountExpression) || String.IsNullOrEmpty(textToRepeat) ? "" : String.Format(RepeatStructure, repeatCountExpression, textToRepeat))
+                        + (String.IsNullOrEmpty(textAfter) ? "" : String.Format(OutputStatementStructure, textAfter));
+
+                var method = String.Format(MethodStructure, body);
+                var code = String.Format(ProgramStructure, method);
+
+                Assert.Equal(code, output.ToString());
+            }
+        }
 
         private class MockLanguageBuilder
         {
