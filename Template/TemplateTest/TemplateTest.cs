@@ -132,6 +132,9 @@
 
         [Theory]
         [InlineData("", "", "")]
+        [InlineData("text", "expression", "text2")]
+        [InlineData("", "expression", "")]
+        [InlineData("text", "", "text2")]
         public void ExpressionToOutput(
                 string textBeforeCode, string expressionToOutput, string textAfterCode)
         {
@@ -147,6 +150,7 @@
             var echoLanguage = new MockLanguageBuilder()
                     .WithProgramWrapper(ProgramStructure)
                     .WithMethodWrapper(MethodStructure)
+                    .WithPlainTextWrapper(OutputStatementStructure)
                     .WithExpressionOutputWrapper(ExpressionOutputStructure)
                     .OutputSelfCode()
                     .GetObject();
