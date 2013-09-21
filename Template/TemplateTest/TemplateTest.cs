@@ -1,6 +1,7 @@
 ﻿namespace TemplateTest
 {
     using System;
+    using System.ComponentModel;
     using System.IO;
 
     using Moq;
@@ -15,10 +16,8 @@
         public void PlainText_AlwaysRenderPlainText()
         {
             // arrange
-            var language = new Mock<IProgrammingLanguage>().Object;
             const string TemplateCode = "abcd";
-            var usings = new string[0];
-            using (var template = new Template(language, TemplateCode, usings))
+            using (var template = new Template(null, TemplateCode, null))
             using (var output = new StringWriter())
             {
                 // act
@@ -50,25 +49,18 @@
             // arrange
             const string ProgramStructure = "begin {0} end";
             const string MethodStructure = "method{{ {0} }}";
-            var codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
-            codeBuilderMock.Setup(builder => builder.WrapAsProgram(It.IsAny<string>()))
-                           .Returns<string>(templateCode => String.Format(ProgramStructure, templateCode));
 
-            codeBuilderMock.Setup<string>(builder => builder.WrapAsMethod(It.IsAny<string>()))
-                           .Returns<string>(methodBody => String.Format(MethodStructure, methodBody));
+            var echoLanguage = new MockLanguageBuilder()
+                    .WithProgramWrapper(ProgramStructure)
+                    .WithMethodWrapper(MethodStructure)
+                    .OutputSelfCode()
+                    .GetObject();
 
-            var echoLanguageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);
-            echoLanguageMock.Setup(language => language.GetCodeBuilder())
-                            .Returns(codeBuilderMock.Object);
-
-            echoLanguageMock.Setup(language => language.Compile(It.IsAny<string>()))
-                            .Returns<string>(programmCode => new PlainTextOutputScript(programmCode));
-            
             const string Code = "code";
             var templateText = string.Format("[%{0}%]", Code);
 
             // act
-            using (var template = new Template(echoLanguageMock.Object, templateText, null))
+            using (var template = new Template(echoLanguage, templateText, null))
             using (var output = new StringWriter())
             {    
                 template.Render(output);
@@ -101,29 +93,19 @@
             const string OutputStatementStructure = @"output(""{0}"");";
             const string MethodStructure = "method{{ {0} }}";
 
-            var codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
-            codeBuilderMock.Setup(builder => builder.WrapAsProgram(It.IsAny<string>()))
-                           .Returns<string>(templateCode => String.Format(ProgramStructure, templateCode));
-            
-            codeBuilderMock.Setup(builder => builder.WrapAsPlainTextOutputStatement(It.IsAny<string>()))
-                           .Returns<string>(textToOutput => String.Format(OutputStatementStructure, textToOutput));
-
-            codeBuilderMock.Setup<string>(builder => builder.WrapAsMethod(It.IsAny<string>()))
-                           .Returns<string>(methodBody => String.Format(MethodStructure, methodBody));
-
-            var echoLanguageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);
-            echoLanguageMock.Setup(language => language.GetCodeBuilder())
-                            .Returns(codeBuilderMock.Object);
-
-            echoLanguageMock.Setup(language => language.Compile(It.IsAny<string>()))
-                            .Returns<string>(programmCode => new PlainTextOutputScript(programmCode));
+            var echoLanguage = new MockLanguageBuilder()
+                    .WithProgramWrapper(ProgramStructure)
+                    .WithMethodWrapper(MethodStructure)
+                    .WithPlainTextWrapper(OutputStatementStructure)
+                    .OutputSelfCode()
+                    .GetObject();
 
             const string PlainText = "text";
             const string Code = "code";
             var templateText = String.Format("{0}[%{1}%]", PlainText, Code);
 
             // act
-            using (var template = new Template(echoLanguageMock.Object, templateText, null))
+            using (var template = new Template(echoLanguage, templateText, null))
             using (var output = new StringWriter())
             {
                 template.Render(output);
@@ -133,6 +115,54 @@
                 var method = String.Format(MethodStructure, body);
                 var code = String.Format(ProgramStructure, method);
                 Assert.Equal(code, output.ToString());
+            }
+        }
+
+        private class MockLanguageBuilder
+        {
+            private readonly Mock<IProgrammingLanguage> languageMock;
+
+            private readonly Mock<ICodeBuilder> codeBuilderMock;
+
+            public MockLanguageBuilder()
+            {
+                this.codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
+                this.languageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);
+                this.languageMock.Setup(language => language.GetCodeBuilder())
+                                 .Returns(this.codeBuilderMock.Object);
+            }
+
+            public MockLanguageBuilder WithProgramWrapper(string programStructure)
+            {
+                this.codeBuilderMock.Setup(builder => builder.WrapAsProgram(It.IsAny<string>()))
+                               .Returns<string>(templateCode => String.Format(programStructure, templateCode));
+                return this;
+            }
+
+            public MockLanguageBuilder WithMethodWrapper(string methodStructure)
+            {
+                this.codeBuilderMock.Setup<string>(builder => builder.WrapAsMethod(It.IsAny<string>()))
+                               .Returns<string>(methodBody => String.Format(methodStructure, methodBody));
+                return this;
+            }
+
+            public MockLanguageBuilder WithPlainTextWrapper(string outputStatementStructure)
+            {
+                this.codeBuilderMock.Setup(builder => builder.WrapAsPlainTextOutputStatement(It.IsAny<string>()))
+                           .Returns<string>(textToOutput => String.Format(outputStatementStructure, textToOutput));
+                return this;
+            }
+
+            public MockLanguageBuilder OutputSelfCode()
+            {
+                this.languageMock.Setup(language => language.Compile(It.IsAny<string>()))
+                                .Returns<string>(programmCode => new PlainTextOutputScript(programmCode));
+                return this;
+            }
+
+            public IProgrammingLanguage GetObject()
+            {
+                return this.languageMock.Object;
             }
         }
     }

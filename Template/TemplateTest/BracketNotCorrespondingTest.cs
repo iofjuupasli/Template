@@ -5,79 +5,25 @@
     using Template;
 
     using Xunit;
+    using Xunit.Extensions;
 
     public class BracketNotCorrespondingTest
     {
-        [Fact]
-        public void OneOpenCodeBracket()
+        [Theory]
+        [InlineData("only one [%open bracket")]
+        [InlineData("only one %]close bracket")]
+        [InlineData("open brackeet %]after [% close")]
+        [InlineData("duplicated[%close %]bracket %]")]
+        [InlineData("[%tduplicated [%open %]bracket")]
+        [InlineData("nested[%brackets [%foo %]bar %]")]
+        public void WrongBrackets(string templateCode)
         {
             // arrange
             var language = new Mock<IProgrammingLanguage>().Object;
-            const string TemplateCode = "text before [%text after";
 
             // act and assert
             Assert.Throws<BracketsNotCorrespondsException>(() =>
-                new Template(language, TemplateCode, null));
-        }
-
-        [Fact]
-        public void OneCloseCodeBracket()
-        {
-            // arrange
-            var language = new Mock<IProgrammingLanguage>().Object;
-            const string TemplateCode = "text before %]text after";
-
-            // act and assert
-            Assert.Throws<BracketsNotCorrespondsException>(() =>
-                new Template(language, TemplateCode, null));
-        }
-
-        [Fact]
-        public void OpenBracketAfterClose()
-        {
-            // arrange
-            var language = new Mock<IProgrammingLanguage>().Object;
-            const string TemplateCode = "text before %]text [% after";
-
-            // act and assert
-            Assert.Throws<BracketsNotCorrespondsException>(() =>
-                new Template(language, TemplateCode, null));
-        }
-
-        [Fact]
-        public void OneOpenTwoClose()
-        {
-            // arrange
-            var language = new Mock<IProgrammingLanguage>().Object;
-            const string TemplateCode = "text bef[%ore %]text aft%]er";
-
-            // act and assert
-            Assert.Throws<BracketsNotCorrespondsException>(() =>
-                new Template(language, TemplateCode, null));
-        }
-
-        [Fact]
-        public void TwoOpenOneClose()
-        {
-            // arrange
-            var language = new Mock<IProgrammingLanguage>().Object;
-            const string TemplateCode = "tex[%t bef[%ore %]text after";
-
-            // act and assert
-            Assert.Throws<BracketsNotCorrespondsException>(() =>
-                new Template(language, TemplateCode, null));
-        }
-
-        [Fact]
-        public void NestedBrackets()
-        {
-            // arrange
-            var language = new Mock<IProgrammingLanguage>().Object;
-            const string TemplateCode = "tex[%t bef[%ore %]text a%]fter";
-
-            // act and assert
-            Assert.Throws<BracketsNotCorrespondsException>(() =>
-                new Template(language, TemplateCode, null));
+                new Template(language, templateCode, null));
         }
     }
 }
