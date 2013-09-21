@@ -98,7 +98,7 @@
             codeBuilderMock.Setup(builder => builder.CoverAsProgram(It.IsAny<string>()))
                            .Returns<string>(templateCode => String.Format(ProgramStructure, templateCode));
             
-            codeBuilderMock.Setup<string>(builder => builder.CoverAsPlainTextOutputStatement(It.IsAny<string>()))
+            codeBuilderMock.Setup(builder => builder.CoverAsPlainTextOutputStatement(It.IsAny<string>()))
                            .Returns<string>(textToOutput => String.Format(OutputStatementStructure, textToOutput));
 
             var echoLanguageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);

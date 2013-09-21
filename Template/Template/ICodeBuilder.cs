@@ -3,5 +3,7 @@
     public interface ICodeBuilder
     {
         string CoverAsProgram(string methodBody);
+
+        string CoverAsPlainTextOutputStatement(string text);
     }
 }

@@ -40,6 +40,12 @@
 
         private static string BuildCode(string code, ICodeBuilder codeBuilder)
         {
+            code = Regex.Replace(
+                code,
+                @"(?<=\A).+(?=\[%)",
+                match => codeBuilder.CoverAsPlainTextOutputStatement(match.Value),
+                RegexOptions.Singleline);
+
             code = code.Replace("[%", string.Empty).Replace("%]", string.Empty);
             code = codeBuilder.CoverAsProgram(code);
             return code;
