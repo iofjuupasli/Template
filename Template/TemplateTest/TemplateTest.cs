@@ -90,10 +90,16 @@
         [Theory]
         [InlineData("", "", "", "", "")]
         [InlineData("text1", "code1", "text2", "code2", "text3")]
+        [InlineData("text1", "code1", "text2", "code2", "")]
+        [InlineData("text1", "code1", "", "code2", "text3")]
+        [InlineData("", "code1", "text2", "code2", "text3")]
         public void PlainText_ShouldBeInterpretedAsTextToOutput(
                 string textBeforeCode, string firstCode, string textBw, string secondCode, string textAfterCode)
         {
             // arrange
+            var templateText = String.Format("{0}[%{1}%]{2}[%{3}%]{4}",
+                    textBeforeCode, firstCode, textBw, secondCode, textAfterCode);
+
             const string ProgramStructure = "begin {0} end";
             const string OutputStatementStructure = @"output(""{0}"");";
             const string MethodStructure = "method{{ {0} }}";
@@ -104,9 +110,6 @@
                     .WithPlainTextWrapper(OutputStatementStructure)
                     .OutputSelfCode()
                     .GetObject();
-
-            var templateText = String.Format("{0}[%{1}%]{2}[%{3}%]{4}",
-                    textBeforeCode, firstCode, textBw, secondCode, textAfterCode);
 
             // act
             using (var template = new Template(echoLanguage, templateText, null))
@@ -124,39 +127,6 @@
                 var method = String.Format(MethodStructure, body);
                 var code = String.Format(ProgramStructure, method);
 
-                Assert.Equal(code, output.ToString());
-            }
-        }
-
-        [Fact]
-        public void TextBeforeCode_ShouldBeInterpretedAsTextToOutput()
-        {
-            // arrange
-            const string ProgramStructure = "begin {0} end";
-            const string OutputStatementStructure = @"output(""{0}"");";
-            const string MethodStructure = "method{{ {0} }}";
-
-            var echoLanguage = new MockLanguageBuilder()
-                    .WithProgramWrapper(ProgramStructure)
-                    .WithMethodWrapper(MethodStructure)
-                    .WithPlainTextWrapper(OutputStatementStructure)
-                    .OutputSelfCode()
-                    .GetObject();
-
-            const string PlainText = "text";
-            const string Code = "code";
-            var templateText = String.Format("{0}[%{1}%]", PlainText, Code);
-
-            // act
-            using (var template = new Template(echoLanguage, templateText, null))
-            using (var output = new StringWriter())
-            {
-                template.Render(output);
-
-                // assert
-                var body = String.Format(OutputStatementStructure, PlainText) + Code;
-                var method = String.Format(MethodStructure, body);
-                var code = String.Format(ProgramStructure, method);
                 Assert.Equal(code, output.ToString());
             }
         }
