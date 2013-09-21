@@ -175,6 +175,9 @@
 
         [Theory]
         [InlineData("", "", "", "")]
+        [InlineData("before", "expression", "toRepeat", "after")]
+        [InlineData("before", "", "toRepeat", "after")]
+        [InlineData("before", "expression", "", "after")]
         public void RepeatExpression(
                 string textBefore, string repeatCountExpression, string textToRepeat, string textAfter)
         {
@@ -200,10 +203,10 @@
             using (var output = new StringWriter())
             {
                 template.Render(output);
-
+                var toRepeat = (String.IsNullOrEmpty(textToRepeat) ? "" : String.Format(OutputStatementStructure, textToRepeat));
                 // assert
                 var body = (String.IsNullOrEmpty(textBefore) ? "" : String.Format(OutputStatementStructure, textBefore))
-                        + (String.IsNullOrEmpty(repeatCountExpression) || String.IsNullOrEmpty(textToRepeat) ? "" : String.Format(RepeatStructure, repeatCountExpression, textToRepeat))
+                        + (String.IsNullOrEmpty(repeatCountExpression) || String.IsNullOrEmpty(toRepeat) ? "" : String.Format(RepeatStructure, repeatCountExpression, toRepeat))
                         + (String.IsNullOrEmpty(textAfter) ? "" : String.Format(OutputStatementStructure, textAfter));
 
                 var method = String.Format(MethodStructure, body);
