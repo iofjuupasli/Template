@@ -89,6 +89,7 @@
 
         [Theory]
         [InlineData("", "", "", "", "")]
+        [InlineData("text1", "code1", "text2", "code2", "text3")]
         public void PlainText_ShouldBeInterpretedAsTextToOutput(
                 string textBeforeCode, string firstCode, string textBw, string secondCode, string textAfterCode)
         {

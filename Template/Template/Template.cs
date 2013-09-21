@@ -52,7 +52,7 @@
         {
             return Regex.Replace(
                 code,
-                @"(?<=\A).*?(?=\[%)",
+                @"((?<=\A).*?(?=\[%))|((?<=%\]).*?(?=\[%))|((?!.*%\])(?!\]).*(?=$))",
                 match => String.IsNullOrEmpty(match.Value) ? String.Empty : wrapper(match.Value),
                 RegexOptions.Singleline);
         }
