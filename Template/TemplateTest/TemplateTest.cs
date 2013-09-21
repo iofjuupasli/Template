@@ -52,7 +52,7 @@
             var templateText = string.Format("[%{0}%]", Code);
             var codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
             const string ProgramStructure = "begin {0} end";
-            codeBuilderMock.Setup(builder => builder.CoverAsProgram(It.IsAny<string>()))
+            codeBuilderMock.Setup(builder => builder.WrapAsProgram(It.IsAny<string>()))
                            .Returns<string>(templateCode => String.Format(ProgramStructure, templateCode));
 
             var echoLanguageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);
@@ -95,10 +95,10 @@
             const string OutputStatementStructure = @"output(""{0}"");";
 
             var codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
-            codeBuilderMock.Setup(builder => builder.CoverAsProgram(It.IsAny<string>()))
+            codeBuilderMock.Setup(builder => builder.WrapAsProgram(It.IsAny<string>()))
                            .Returns<string>(templateCode => String.Format(ProgramStructure, templateCode));
             
-            codeBuilderMock.Setup(builder => builder.CoverAsPlainTextOutputStatement(It.IsAny<string>()))
+            codeBuilderMock.Setup(builder => builder.WrapAsPlainTextOutputStatement(It.IsAny<string>()))
                            .Returns<string>(textToOutput => String.Format(OutputStatementStructure, textToOutput));
 
             var echoLanguageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);

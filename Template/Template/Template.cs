@@ -7,8 +7,6 @@
 
     public class Template : IDisposable
     {
-        private readonly IProgrammingLanguage language;
-
         private const string CodeExpressionOpenBracket = "[%";
         private const string CodeExpressionCloseBracket = "%]";
 
@@ -32,23 +30,31 @@
                 throw new ArgumentNullException("language");
             }
 
-            this.language = language;
-
             var code = BuildCode(templateCode, language.GetCodeBuilder());
-            this.script = this.language.Compile(code);
+            this.script = language.Compile(code);
         }
 
         private static string BuildCode(string code, ICodeBuilder codeBuilder)
         {
-            code = Regex.Replace(
-                code,
-                @"(?<=\A).+(?=\[%)",
-                match => codeBuilder.CoverAsPlainTextOutputStatement(match.Value),
-                RegexOptions.Singleline);
+            code = ProcessTextOutputs(code, codeBuilder.WrapAsPlainTextOutputStatement);
 
-            code = code.Replace("[%", string.Empty).Replace("%]", string.Empty);
-            code = codeBuilder.CoverAsProgram(code);
+            code = ProcessCodeBlocks(code);
+            code = codeBuilder.WrapAsProgram(code);
             return code;
+        }
+
+        private static string ProcessCodeBlocks(string code)
+        {
+            return code.Replace("[%", string.Empty).Replace("%]", string.Empty);
+        }
+
+        private static string ProcessTextOutputs(string code, Func<string, string> wrapper)
+        {
+            return Regex.Replace(
+                code,
+                @"(?<=\A).+?(?=\[%)",
+                match => wrapper(match.Value),
+                RegexOptions.Singleline);
         }
 
         private static bool IsBracketsCorresponding(string templateCode)
