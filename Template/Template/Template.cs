@@ -37,8 +37,8 @@
         private static string BuildCode(string code, ICodeBuilder codeBuilder)
         {
             code = ProcessTextOutputs(code, codeBuilder.WrapAsPlainTextOutputStatement);
-
             code = ProcessCodeBlocks(code);
+            code = codeBuilder.WrapAsMethod(code);
             code = codeBuilder.WrapAsProgram(code);
             return code;
         }

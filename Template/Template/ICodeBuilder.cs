@@ -2,8 +2,10 @@
 {
     public interface ICodeBuilder
     {
-        string WrapAsProgram(string methodBody);
+        string WrapAsProgram(string method);
 
         string WrapAsPlainTextOutputStatement(string text);
+
+        string WrapAsMethod(string methodBody);
     }
 }
