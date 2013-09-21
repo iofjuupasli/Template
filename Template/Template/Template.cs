@@ -39,10 +39,23 @@
             code = ProcessTextOutputs(code, codeBuilder.WrapAsPlainTextOutputStatement);
             code = ProcessExpressionOutputs(code, codeBuilder.WrapAsExpressionOutput);
             code = ProcessRepeatExpressions(code, codeBuilder.WrapAsRepeatExpression);
+            code = ProcessConditionExpressions(code, codeBuilder.WrapAsConditionExpression);
             code = ProcessCodeBlocks(code);
             code = codeBuilder.WrapAsMethod(code);
             code = codeBuilder.WrapAsProgram(code);
             return code;
+        }
+
+        private static string ProcessConditionExpressions(string code, Func<string, string, string> conditionWrapper)
+        {
+            return Regex.Replace(
+                code,
+                @"\[%\?(.*?)%](.*?)\[%\?%\]",
+                match =>
+                    String.IsNullOrEmpty(match.Groups[1].Value) || String.IsNullOrEmpty(match.Groups[2].Value)
+                        ? String.Empty
+                        : conditionWrapper(match.Groups[1].Value, match.Groups[2].Value),
+                RegexOptions.Singleline);
         }
 
         private static string ProcessRepeatExpressions(string code, Func<string, string, string> repeatExpressionWrapper)

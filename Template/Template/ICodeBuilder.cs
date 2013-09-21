@@ -11,5 +11,7 @@
         string WrapAsExpressionOutput(string expression);
 
         string WrapAsRepeatExpression(string expression, string codeToRepeat);
+
+        string WrapAsConditionExpression(string condition, string codeOnTrue);
     }
 }
