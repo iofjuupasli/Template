@@ -52,8 +52,8 @@
         {
             return Regex.Replace(
                 code,
-                @"(?<=\A).+?(?=\[%)",
-                match => wrapper(match.Value),
+                @"(?<=\A).*?(?=\[%)",
+                match => String.IsNullOrEmpty(match.Value) ? String.Empty : wrapper(match.Value),
                 RegexOptions.Singleline);
         }
 
