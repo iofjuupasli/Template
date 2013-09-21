@@ -7,5 +7,7 @@
         string WrapAsPlainTextOutputStatement(string text);
 
         string WrapAsMethod(string methodBody);
+
+        string WrapAsExpressionOutput(string expression);
     }
 }

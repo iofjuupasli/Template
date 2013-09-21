@@ -37,10 +37,20 @@
         private static string BuildCode(string code, ICodeBuilder codeBuilder)
         {
             code = ProcessTextOutputs(code, codeBuilder.WrapAsPlainTextOutputStatement);
+            code = ProcessExpressionOutputs(code, codeBuilder.WrapAsExpressionOutput);
             code = ProcessCodeBlocks(code);
             code = codeBuilder.WrapAsMethod(code);
             code = codeBuilder.WrapAsProgram(code);
             return code;
+        }
+
+        private static string ProcessExpressionOutputs(string code, Func<string, string> expressionWrapper)
+        {
+            return Regex.Replace(
+                code,
+                @"\[%=(.*?)%\]",
+                match => String.IsNullOrEmpty(match.Groups[1].Value) ? String.Empty : expressionWrapper(match.Groups[1].Value),
+                RegexOptions.Singleline);
         }
 
         private static string ProcessCodeBlocks(string code)

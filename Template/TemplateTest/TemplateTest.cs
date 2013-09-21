@@ -217,6 +217,13 @@
             {
                 return this.languageMock.Object;
             }
+
+            public MockLanguageBuilder WithExpressionOutputWrapper(string expressionOutputStructure)
+            {
+                this.codeBuilderMock.Setup<string>(builder => builder.WrapAsExpressionOutput(It.IsAny<string>()))
+                        .Returns<string>(expression => String.Format(expressionOutputStructure, expression));
+                return this;
+            }
         }
     }
 }
