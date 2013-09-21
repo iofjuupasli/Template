@@ -9,6 +9,7 @@
     using Template;
 
     using Xunit;
+    using Xunit.Extensions;
 
     public class TemplateTest
     {
@@ -62,7 +63,7 @@
             // act
             using (var template = new Template(echoLanguage, templateText, null))
             using (var output = new StringWriter())
-            {    
+            {
                 template.Render(output);
 
                 // assert
@@ -78,11 +79,52 @@
             const string TemplateCode = "[%code%]";
 
             // act
-            var exception = Assert.Throws<ArgumentNullException>(() =>  
+            var exception = Assert.Throws<ArgumentNullException>(() =>
                     new Template(null, TemplateCode, null));
 
             // assert
-            Assert.Equal("language", exception.ParamName);   
+            Assert.Equal("language", exception.ParamName);
+        }
+
+
+        [Theory]
+        [InlineData("", "", "", "", "")]
+        public void PlainText_ShouldBeInterpretedAsTextToOutput(
+                string textBeforeCode, string firstCode, string textBw, string secondCode, string textAfterCode)
+        {
+            // arrange
+            const string ProgramStructure = "begin {0} end";
+            const string OutputStatementStructure = @"output(""{0}"");";
+            const string MethodStructure = "method{{ {0} }}";
+
+            var echoLanguage = new MockLanguageBuilder()
+                    .WithProgramWrapper(ProgramStructure)
+                    .WithMethodWrapper(MethodStructure)
+                    .WithPlainTextWrapper(OutputStatementStructure)
+                    .OutputSelfCode()
+                    .GetObject();
+
+            var templateText = String.Format("{0}[%{1}%]{2}[%{3}%]{4}",
+                    textBeforeCode, firstCode, textBw, secondCode, textAfterCode);
+
+            // act
+            using (var template = new Template(echoLanguage, templateText, null))
+            using (var output = new StringWriter())
+            {
+                template.Render(output);
+
+                // assert
+                var body = (String.IsNullOrEmpty(textBeforeCode) ? "" : String.Format(OutputStatementStructure, textBeforeCode))
+                        + firstCode
+                        + (String.IsNullOrEmpty(textBw) ? "" : String.Format(OutputStatementStructure, textBw))
+                        + secondCode
+                        + (String.IsNullOrEmpty(textAfterCode) ? "" : String.Format(OutputStatementStructure, textAfterCode));
+
+                var method = String.Format(MethodStructure, body);
+                var code = String.Format(ProgramStructure, method);
+
+                Assert.Equal(code, output.ToString());
+            }
         }
 
         [Fact]
