@@ -86,7 +86,6 @@
             Assert.Equal("language", exception.ParamName);
         }
 
-
         [Theory]
         [InlineData("", "", "", "", "")]
         [InlineData("text1", "code1", "text2", "code2", "text3")]
@@ -130,6 +129,47 @@
                 Assert.Equal(code, output.ToString());
             }
         }
+
+        [Theory]
+        [InlineData("", "", "")]
+        public void ExpressionToOutput(
+                string textBeforeCode, string expressionToOutput, string textAfterCode)
+        {
+            // arrange
+            var templateText = String.Format("{0}[%={1}%]{2}",
+                    textBeforeCode, expressionToOutput, textAfterCode);
+
+            const string ProgramStructure = "begin {0} end";
+            const string ExpressionOutputStructure = "output({0});";
+            const string OutputStatementStructure = @"output(""{0}"");";
+            const string MethodStructure = "method{{ {0} }}";
+
+            var echoLanguage = new MockLanguageBuilder()
+                    .WithProgramWrapper(ProgramStructure)
+                    .WithMethodWrapper(MethodStructure)
+                    .WithExpressionOutputWrapper(ExpressionOutputStructure)
+                    .OutputSelfCode()
+                    .GetObject();
+
+            // act
+            using (var template = new Template(echoLanguage, templateText, null))
+            using (var output = new StringWriter())
+            {
+                template.Render(output);
+
+                // assert
+                var body = (String.IsNullOrEmpty(textBeforeCode) ? "" : String.Format(OutputStatementStructure, textBeforeCode))
+                        + (String.IsNullOrEmpty(expressionToOutput) ? "" : String.Format(ExpressionOutputStructure, expressionToOutput))
+                        + (String.IsNullOrEmpty(textAfterCode) ? "" : String.Format(OutputStatementStructure, textAfterCode));
+
+                var method = String.Format(MethodStructure, body);
+                var code = String.Format(ProgramStructure, method);
+
+                Assert.Equal(code, output.ToString());
+            }
+        }
+
+
 
         private class MockLanguageBuilder
         {
