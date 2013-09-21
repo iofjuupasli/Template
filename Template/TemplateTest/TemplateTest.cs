@@ -86,5 +86,43 @@
             // assert
             Assert.Equal("language", exception.ParamName);   
         }
+
+        [Fact]
+        public void TextBeforeCode_ShouldBeInterpretedAsTextToOutput()
+        {
+            // arrange
+            const string ProgramStructure = "begin {0} end";
+            const string OutputStatementStructure = @"output(""{0}"");";
+
+            var codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
+            codeBuilderMock.Setup(builder => builder.CoverAsProgram(It.IsAny<string>()))
+                           .Returns<string>(templateCode => String.Format(ProgramStructure, templateCode));
+            
+            codeBuilderMock.Setup<string>(builder => builder.CoverAsPlainTextOutputStatement(It.IsAny<string>()))
+                           .Returns<string>(textToOutput => String.Format(OutputStatementStructure, textToOutput));
+
+            var echoLanguageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);
+            echoLanguageMock.Setup(language => language.GetCodeBuilder())
+                            .Returns(codeBuilderMock.Object);
+
+            echoLanguageMock.Setup(language => language.Compile(It.IsAny<string>()))
+                            .Returns<string>(programmCode => new PlainTextOutputScript(programmCode));
+
+            const string PlainText = "text";
+            const string Code = "code";
+            var templateText = String.Format("{0}[%{1}%]", PlainText, Code);
+
+            // act
+            using (var template = new Template(echoLanguageMock.Object, templateText, null))
+            using (var output = new StringWriter())
+            {
+                template.Render(output);
+
+                // assert
+                var body = String.Format(OutputStatementStructure, PlainText) + Code;
+                var code = String.Format(ProgramStructure, body);
+                Assert.Equal(code, output.ToString());
+            }
+        }
     }
 }
