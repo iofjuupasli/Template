@@ -48,12 +48,14 @@
         public void TemplateWithCodeBlock_InterpretedAsCode()
         {
             // arrange
-            const string Code = "code";
-            var templateText = string.Format("[%{0}%]", Code);
-            var codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
             const string ProgramStructure = "begin {0} end";
+            const string MethodStructure = "method{{ {0} }}";
+            var codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
             codeBuilderMock.Setup(builder => builder.WrapAsProgram(It.IsAny<string>()))
                            .Returns<string>(templateCode => String.Format(ProgramStructure, templateCode));
+
+            codeBuilderMock.Setup<string>(builder => builder.WrapAsMethod(It.IsAny<string>()))
+                           .Returns<string>(methodBody => String.Format(MethodStructure, methodBody));
 
             var echoLanguageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);
             echoLanguageMock.Setup(language => language.GetCodeBuilder())
@@ -61,6 +63,9 @@
 
             echoLanguageMock.Setup(language => language.Compile(It.IsAny<string>()))
                             .Returns<string>(programmCode => new PlainTextOutputScript(programmCode));
+            
+            const string Code = "code";
+            var templateText = string.Format("[%{0}%]", Code);
 
             // act
             using (var template = new Template(echoLanguageMock.Object, templateText, null))
@@ -69,7 +74,8 @@
                 template.Render(output);
 
                 // assert
-                Assert.Equal(String.Format(ProgramStructure, Code), output.ToString());
+                var expectedCode = String.Format(ProgramStructure, String.Format(MethodStructure, Code));
+                Assert.Equal(expectedCode, output.ToString());
             }
         }
 
@@ -93,6 +99,7 @@
             // arrange
             const string ProgramStructure = "begin {0} end";
             const string OutputStatementStructure = @"output(""{0}"");";
+            const string MethodStructure = "method{{ {0} }}";
 
             var codeBuilderMock = new Mock<ICodeBuilder>(MockBehavior.Strict);
             codeBuilderMock.Setup(builder => builder.WrapAsProgram(It.IsAny<string>()))
@@ -100,6 +107,9 @@
             
             codeBuilderMock.Setup(builder => builder.WrapAsPlainTextOutputStatement(It.IsAny<string>()))
                            .Returns<string>(textToOutput => String.Format(OutputStatementStructure, textToOutput));
+
+            codeBuilderMock.Setup<string>(builder => builder.WrapAsMethod(It.IsAny<string>()))
+                           .Returns<string>(methodBody => String.Format(MethodStructure, methodBody));
 
             var echoLanguageMock = new Mock<IProgrammingLanguage>(MockBehavior.Strict);
             echoLanguageMock.Setup(language => language.GetCodeBuilder())
@@ -120,7 +130,8 @@
 
                 // assert
                 var body = String.Format(OutputStatementStructure, PlainText) + Code;
-                var code = String.Format(ProgramStructure, body);
+                var method = String.Format(MethodStructure, body);
+                var code = String.Format(ProgramStructure, method);
                 Assert.Equal(code, output.ToString());
             }
         }
