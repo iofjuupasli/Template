@@ -266,6 +266,15 @@
                         .Returns<string>(expression => String.Format(expressionOutputStructure, expression));
                 return this;
             }
+
+            public MockLanguageBuilder WithRepeatWrapper(string repeatStructure)
+            {
+                this.codeBuilderMock.Setup<string>(
+                    builder => builder.WrapAsRepeatExpression(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns<string, string>(
+                        (expression, toRepeat) => String.Format(repeatStructure, expression, toRepeat));
+                return this;
+            }
         }
     }
 }

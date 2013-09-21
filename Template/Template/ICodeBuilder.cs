@@ -9,5 +9,7 @@
         string WrapAsMethod(string methodBody);
 
         string WrapAsExpressionOutput(string expression);
+
+        string WrapAsRepeatExpression(string expression, string codeToRepeat);
     }
 }
