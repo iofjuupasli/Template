@@ -40,6 +40,16 @@
             this.script = language.Compile(code);
         }
 
+        public void Render(TextWriter output, params object[] values)
+        {
+            this.script.Run(values.Concat(new[] { output }).ToArray());
+        }
+
+        public void Dispose()
+        {
+            this.script.Dispose();
+        }
+
         private class TemplateCodeBuilder
         {
             private readonly ICodeBuilder codeBuilder;
@@ -185,16 +195,6 @@
         private static bool IsTemplateCodeLanguageIndependent(string templateCode)
         {
             return !templateCode.Contains(CodeExpressionOpenBracket);
-        }
-
-        public void Dispose()
-        {
-            this.script.Dispose();
-        }
-
-        public void Render(TextWriter output, params object[] values)
-        {
-            this.script.Run(values.Concat(new[] { output }).ToArray());
         }
     }
 }
