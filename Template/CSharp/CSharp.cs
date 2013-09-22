@@ -9,8 +9,10 @@ namespace CSharp
     using System.CodeDom.Compiler;
     using System.IO;
     using System.Reflection;
+    using System.Xml.Xsl;
 
     using Microsoft.CSharp;
+    using Microsoft.CSharp.RuntimeBinder;
 
     using Template;
 
@@ -27,6 +29,22 @@ namespace CSharp
             var assemblies = new[] { "System.dll", "System.Core.dll" };
             var compilerParameters = new CompilerParameters(assemblies);
             var compiled = codeProvider.CompileAssemblyFromSource(compilerParameters, code);
+            var errors = compiled.Errors;
+            if (errors.HasErrors)
+            {
+                var errorsString = String.Join(
+                    Environment.NewLine,
+                    errors.Cast<CompilerError>()
+                        .Select(error => String.Format(
+                                    "{0} line: {1} column: {2}: \"{3}\"",
+                                    error.ErrorNumber,
+                                    error.Line,
+                                    error.Column,
+                                    error.ErrorText)));
+
+                throw new CompileErrorException(errorsString);
+            }
+
             var assembly = compiled.CompiledAssembly;
             var type = assembly.GetType("MyClass");
             var method = type.GetMethod("Run");

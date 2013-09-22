@@ -28,5 +28,16 @@
                 Assert.Equal("text", output.ToString());
             }
         }
+
+        [Fact]
+        public void ErrorHandling()
+        {
+            // arrange
+            var language = new CSharp();
+            const string TemplateCode = "text[%error%]";
+
+            var exception = Assert.Throws<CompileErrorException>(() => 
+                    new Template(language, TemplateCode, null));
+        }
     }
 }
