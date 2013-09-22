@@ -8,5 +8,6 @@
         Boolean,
         Double,
         DateTime,
+        Output,
     }
 }

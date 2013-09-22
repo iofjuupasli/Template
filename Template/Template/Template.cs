@@ -30,6 +30,12 @@
                 throw new ArgumentNullException("language");
             }
 
+            {
+                var vars = variables.ToList();
+                vars.Add(new Variable("output", ArgumentType.Output));
+                variables = vars.ToArray();
+            }
+
             var code = BuildCode(templateCode, language.GetCodeBuilder(), usings, variables);
             this.script = language.Compile(code);
         }

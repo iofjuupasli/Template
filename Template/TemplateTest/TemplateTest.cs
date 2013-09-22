@@ -272,7 +272,7 @@
                 template.Render(output);
 
                 // assert
-                var expected = "begin using System; using My.Program.Using; method(){ output(\"text\");code; } end";
+                var expected = "begin using System; using My.Program.Using; method(MyOutput output){ output(\"text\");code; } end";
                 Assert.Equal(expected, output.ToString());
             }
         }

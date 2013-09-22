@@ -36,7 +36,7 @@
                 template.Render(output, value);
 
                 // assert
-                var expected = "begin method(" + echoLanguage.GetCodeBuilder().ConvertType(type) + " varName){ code;output(\"text\"); } end";
+                var expected = "begin method(" + echoLanguage.GetCodeBuilder().ConvertType(type) + " varName, MyOutput output){ code;output(\"text\"); } end";
                 Assert.Equal(expected, output.ToString());
                 
             }
@@ -67,7 +67,7 @@
 
                 // assert
                 var expected =
-                    "begin method(MyBoolean firstVar, MyDateTime secondVar, MyDouble thirdVar, MyInteger fourthVar, MyLong fifthVar, MyString sixthVar){ output(\"text\");code; } end";
+                    "begin method(MyBoolean firstVar, MyDateTime secondVar, MyDouble thirdVar, MyInteger fourthVar, MyLong fifthVar, MyString sixthVar, MyOutput output){ output(\"text\");code; } end";
                 Assert.Equal(expected, output.ToString());
             }
         }
