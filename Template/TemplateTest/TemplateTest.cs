@@ -256,5 +256,25 @@
                 Assert.Equal(code, output.ToString());
             }
         }
+
+        [Fact]
+        public void UsingStatements()
+        {
+            // arrange
+            var langugage = new EchoLanguageStub();
+            var templateText = "text[%code;%]";
+            var usings = new[] { "System", "My.Program.Using" };
+
+            // act
+            using (var template = new Template(langugage, templateText, usings))
+            using (var output = new StringWriter())
+            {
+                template.Render(output);
+
+                // assert
+                var expected = "begin using System; using My.Program.Using; method(){ output(\"text\");code; } end";
+                Assert.Equal(expected, output.ToString());
+            }
+        }
     }
 }
