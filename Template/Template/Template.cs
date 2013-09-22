@@ -3,7 +3,6 @@
     using System;
     using System.IO;
     using System.Linq;
-    using System.Text;
     using System.Text.RegularExpressions;
 
     public class Template : IDisposable
@@ -145,65 +144,6 @@
                 this.templateCode = this.codeBuilder.WrapAsProgram(this.templateCode, usings);
             }
         }
-/*
-        private static string BuildCode(string code, ICodeBuilder codeBuilder, string[] usings, params Variable[] variables)
-        {
-            code = ProcessTextOutputs(code, codeBuilder.WrapAsPlainTextOutputStatement);
-            code = ProcessExpressionOutputs(code, codeBuilder);
-            code = ProcessRepeatExpressions(code, codeBuilder);
-            code = ProcessConditionExpressions(code, codeBuilder);
-            code = ProcessCodeBlocks(code);
-            code = codeBuilder.WrapAsMethod(code, variables);
-            code = codeBuilder.WrapAsProgram(code, usings);
-            return code;
-        }
-
-        private static string ProcessConditionExpressions(string code, ICodeBuilder codeBuilder)
-        {
-            return Regex.Replace(
-                code,
-                @"\[%\?(.*?)%](.*?)\[%\?%\]",
-                match =>
-                    String.IsNullOrEmpty(match.Groups[1].Value) || String.IsNullOrEmpty(match.Groups[2].Value)
-                        ? String.Empty
-                        : conditionWrapper(match.Groups[1].Value, match.Groups[2].Value),
-                RegexOptions.Singleline);
-        }
-
-        private static string ProcessRepeatExpressions(string code, ICodeBuilder codeBuilder)
-        {
-            return Regex.Replace(
-                code,
-                @"\[%@(.*?)%](.*?)\[%@%\]",
-                match =>
-                    String.IsNullOrEmpty(match.Groups[1].Value) || String.IsNullOrEmpty(match.Groups[2].Value)
-                        ? String.Empty
-                        : repeatExpressionWrapper(match.Groups[1].Value, match.Groups[2].Value),
-                RegexOptions.Singleline);
-        }
-
-        private static string ProcessExpressionOutputs(string code, ICodeBuilder codeBuilder)
-        {
-            return Regex.Replace(
-                code,
-                @"\[%=(.*?)%\]",
-                match => String.IsNullOrEmpty(match.Groups[1].Value) ? String.Empty : codeBuilder.WrapAsExpressionOutput(match.Groups[1].Value),
-                RegexOptions.Singleline);
-        }
-
-        private static string ProcessCodeBlocks(string code)
-        {
-            return code.Replace("[%", string.Empty).Replace("%]", string.Empty);
-        }
-
-        private static string ProcessTextOutputs(string code, Func<string, string> wrapper)
-        {
-            return Regex.Replace(
-                code,
-                @"(?:(?<=\A).*?(?=\[%))|(?:(?<=%\]).*?(?=\[%))|(?:(?!.*%\])(?!\]).*(?=\Z))",
-                match => String.IsNullOrEmpty(match.Value) ? String.Empty : wrapper(match.Value),
-                RegexOptions.Singleline);
-        }*/
 
         private static bool IsBracketsCorresponding(string templateCode)
         {
