@@ -19,6 +19,10 @@ namespace CSharp
 
     public class CSharp : IProgrammingLanguage
     {
+        private const string ClassName = "MyClass";
+
+        private const string MethodName = "Run";
+
         public ICodeBuilder GetCodeBuilder()
         {
             return new CSharpCodeBuilder();
@@ -47,8 +51,8 @@ namespace CSharp
             }
 
             var assembly = compiled.CompiledAssembly;
-            var type = assembly.GetType("MyClass");
-            var method = type.GetMethod("Run");
+            var type = assembly.GetType(ClassName);
+            var method = type.GetMethod(MethodName);
             return new CSharpScript(method);
         }
 
@@ -78,7 +82,7 @@ namespace CSharp
                 return String.Format(@"
 {0}
 
-public static class MyClass
+public static class " + ClassName + @"
 {{
     {1}
 }}", usings == null
@@ -87,25 +91,25 @@ public static class MyClass
                     method);
             }
 
-            public string WrapAsPlainTextOutputStatement(string text)
+            public string WrapAsPlainTextOutputStatement(string text, string outputVariableName)
             {
                 text = String.Concat(text.Select(c => String.Format(@"\u{0:x4}", (int)c)));
-                return String.Format("output.Write(\"{0}\");", text);
+                return String.Format("{0}.Write(\"{1}\");", outputVariableName, text);
             }
 
             public string WrapAsMethod(string methodBody, params Variable[] variables)
             {
                 return String.Format(@"
-    public static void Run({0})
+    public static void " + MethodName + @"({0})
     {{
         {1}
     }}", String.Join(", ", variables.Select(variable => String.Format("{0} {1}", this.ConvertType(variable.Type), variable.Name))),
                     methodBody);
             }
 
-            public string WrapAsExpressionOutput(string expression)
+            public string WrapAsExpressionOutput(string expression, string outputVariableName)
             {
-                return String.Format("output.Write({0});", expression);
+                return String.Format("{0}.Write({1});",outputVariableName, expression);
             }
 
             public string OpenRepeatExpression(string repeatCountExpression)

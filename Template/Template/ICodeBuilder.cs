@@ -4,11 +4,11 @@
     {
         string WrapAsProgram(string method, string[] usings);
 
-        string WrapAsPlainTextOutputStatement(string text);
+        string WrapAsPlainTextOutputStatement(string text, string outputVariableName);
 
         string WrapAsMethod(string methodBody, params Variable[] variables);
 
-        string WrapAsExpressionOutput(string expression);
+        string WrapAsExpressionOutput(string expression, string outputVariableName);
 
         string OpenRepeatExpression(string repeatCountExpression);
 

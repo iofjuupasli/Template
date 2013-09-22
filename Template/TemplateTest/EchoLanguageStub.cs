@@ -31,9 +31,9 @@ namespace TemplateTest
             return String.Format("begin {0}{1} end", usingsString, method);
         }
 
-        public string WrapAsPlainTextOutputStatement(string text)
+        public string WrapAsPlainTextOutputStatement(string text, string outputVariableName)
         {
-            return String.Format("output(\"{0}\");", text);
+            return String.Format("{0}(\"{1}\");", outputVariableName, text);
         }
 
         public string WrapAsMethod(string methodBody, params Variable[] variables)
@@ -67,9 +67,9 @@ namespace TemplateTest
             return "}";
         }
 
-        public string WrapAsExpressionOutput(string expression)
+        public string WrapAsExpressionOutput(string expression, string outputVariableName)
         {
-            return String.Format("output({0});", expression);
+            return String.Format("{0}({1});", outputVariableName, expression);
         }
         
         public string ConvertType(ArgumentType type)

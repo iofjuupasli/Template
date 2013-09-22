@@ -45,8 +45,8 @@
 
         public MockLanguageBuilder WithPlainTextWrapper(string outputStatementStructure)
         {
-            this.codeBuilderMock.Setup(builder => builder.WrapAsPlainTextOutputStatement(It.IsAny<string>()))
-                .Returns<string>(textToOutput => String.Format(outputStatementStructure, textToOutput));
+            this.codeBuilderMock.Setup(builder => builder.WrapAsPlainTextOutputStatement(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns<string, string>((textToOutput, output) => String.Format(outputStatementStructure, textToOutput));
             return this;
         }
 
@@ -60,8 +60,8 @@
 
         public MockLanguageBuilder WithExpressionOutputWrapper(string expressionOutputStructure)
         {
-            this.codeBuilderMock.Setup(builder => builder.WrapAsExpressionOutput(It.IsAny<string>()))
-                .Returns<string>(expression => String.Format(expressionOutputStructure, expression));
+            this.codeBuilderMock.Setup(builder => builder.WrapAsExpressionOutput(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns<string, string>((expression, output) => String.Format(expressionOutputStructure, expression));
             return this;
         }
 

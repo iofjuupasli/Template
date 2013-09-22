@@ -10,6 +10,8 @@
         private const string CodeExpressionOpenBracket = "[%";
         private const string CodeExpressionCloseBracket = "%]";
 
+        private const string OutputVariableName = "output";
+
         private readonly IScript script;
 
         public Template(IProgrammingLanguage language, string templateCode, string[] usings, params Variable[] variables)
@@ -94,7 +96,7 @@
                     @"(?:(?<=\A).*?(?=\[%))|(?:(?<=%\]).*?(?=\[%))|(?:(?!.*%\])(?!\]).*(?=\Z))",
                     match => String.IsNullOrEmpty(match.Value) 
                         ? String.Empty
-                        : String.Format("[%{0}%]", this.codeBuilder.WrapAsPlainTextOutputStatement(match.Value)),
+                        : String.Format("[%{0}%]", this.codeBuilder.WrapAsPlainTextOutputStatement(match.Value, OutputVariableName)),
                     RegexOptions.Singleline);
             }
 
@@ -104,8 +106,8 @@
                     this.templateCode,
                     @"\[%=(.*?)%\]",
                     match => String.IsNullOrEmpty(match.Groups[1].Value) 
-                        ? String.Empty 
-                        : codeBuilder.WrapAsExpressionOutput(match.Groups[1].Value),
+                        ? String.Empty
+                        : codeBuilder.WrapAsExpressionOutput(match.Groups[1].Value, OutputVariableName),
                     RegexOptions.Singleline);
             }
 
