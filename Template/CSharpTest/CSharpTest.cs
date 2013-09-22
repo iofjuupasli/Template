@@ -39,5 +39,26 @@
             var exception = Assert.Throws<CompileErrorException>(() => 
                     new Template(language, TemplateCode, null));
         }
+
+        [Fact]
+        public void AllUTFChars()
+        {
+            var language = new CSharp();
+            var templateText = "[%%]";
+            for (char i = Char.MinValue; i < Char.MaxValue; i++)
+            {
+                templateText += i;
+            }
+
+            // act
+            using (var template = new Template(language, templateText, null))
+            using (var output = new StringWriter())
+            {
+                template.Render(output);
+
+                // assert
+                Assert.Equal(templateText.Remove(0, 4), output.ToString());
+            }
+        }
     }
 }

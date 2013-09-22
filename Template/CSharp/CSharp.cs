@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace CSharp
 {
+    using System.CodeDom;
     using System.CodeDom.Compiler;
     using System.IO;
     using System.Reflection;
@@ -88,6 +89,7 @@ public static class MyClass
 
             public string WrapAsPlainTextOutputStatement(string text)
             {
+                text = String.Concat(text.Select(c => String.Format(@"\u{0:x4}", (int)c)));
                 return String.Format("output.Write(\"{0}\");", text);
             }
 

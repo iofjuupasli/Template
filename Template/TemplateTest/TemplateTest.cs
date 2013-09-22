@@ -264,5 +264,25 @@
                 Assert.Equal(expected, output.ToString());
             }
         }
+
+        [Fact]
+        public void AllUTFChars()
+        {
+            var templateText = "";
+            for (char i = Char.MinValue; i < Char.MaxValue; i++)
+            {
+                templateText += i;
+            }
+
+            // act
+            using (var template = new Template(null, templateText, null))
+            using (var output = new StringWriter())
+            {
+                template.Render(output);
+
+                // assert
+                Assert.Equal(templateText, output.ToString());
+            }
+        }
     }
 }
