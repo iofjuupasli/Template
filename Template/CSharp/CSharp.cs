@@ -70,7 +70,7 @@ public static class MyClass
 
             public string WrapAsPlainTextOutputStatement(string text)
             {
-                return String.Format("output.Write(\"{0}\")", text);
+                return String.Format("output.Write(\"{0}\");", text);
             }
 
             public string WrapAsMethod(string methodBody, params Variable[] variables)
@@ -85,7 +85,7 @@ public static class MyClass
 
             public string WrapAsExpressionOutput(string expression)
             {
-                return String.Format("output.Write({0})", expression);
+                return String.Format("output.Write({0});", expression);
             }
 
             public string OpenRepeatExpression(string repeatCountExpression)
