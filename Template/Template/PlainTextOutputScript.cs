@@ -1,6 +1,7 @@
 ﻿namespace Template
 {
     using System.IO;
+    using System.Linq;
 
     public class PlainTextOutputScript : IScript
     {
@@ -11,8 +12,9 @@
             this.text = text;
         }
 
-        public void Run(TextWriter output, params object[] values)
+        public void Run(params object[] values)
         {
+            var output = (TextWriter)values.Last();
             output.Write(this.text);
         }
 

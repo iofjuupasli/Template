@@ -148,7 +148,7 @@
 
         public void Render(TextWriter output, params object[] values)
         {
-            this.script.Run(output, values);
+            this.script.Run(values.Concat(new[] { output }).ToArray());
         }
     }
 }
