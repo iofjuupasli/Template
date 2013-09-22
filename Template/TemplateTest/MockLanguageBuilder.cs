@@ -24,8 +24,8 @@
 
         public MockLanguageBuilder WithProgramWrapper(string programStructure)
         {
-            this.codeBuilderMock.Setup(builder => builder.WrapAsProgram(It.IsAny<string>()))
-                .Returns<string>(templateCode => String.Format(programStructure, templateCode));
+            this.codeBuilderMock.Setup(builder => builder.WrapAsProgram(It.IsAny<string>(), It.IsAny<string[]>()))
+                .Returns<string, string[]>((templateCode, usings) => String.Format(programStructure, templateCode));
             return this;
         }
 

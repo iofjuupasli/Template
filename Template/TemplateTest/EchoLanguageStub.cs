@@ -23,9 +23,12 @@ namespace TemplateTest
 
     internal class SimpleCodeBuilderStub : ICodeBuilder
     {
-        public string WrapAsProgram(string method)
+        public string WrapAsProgram(string method, string[] usings)
         {
-            return String.Format("begin {0} end", method);
+            var usingsString = usings == null
+                ? String.Empty
+                : String.Concat(usings.Select(@using => String.Format("using {0}; ", @using)));
+            return String.Format("begin {0}{1} end", usingsString, method);
         }
 
         public string WrapAsPlainTextOutputStatement(string text)

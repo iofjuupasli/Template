@@ -2,7 +2,7 @@
 {
     public interface ICodeBuilder
     {
-        string WrapAsProgram(string method);
+        string WrapAsProgram(string method, string[] usings);
 
         string WrapAsPlainTextOutputStatement(string text);
 

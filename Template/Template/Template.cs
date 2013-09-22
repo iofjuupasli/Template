@@ -30,11 +30,11 @@
                 throw new ArgumentNullException("language");
             }
 
-            var code = BuildCode(templateCode, language.GetCodeBuilder(), variables);
+            var code = BuildCode(templateCode, language.GetCodeBuilder(), usings, variables);
             this.script = language.Compile(code);
         }
 
-        private static string BuildCode(string code, ICodeBuilder codeBuilder, params Variable[] variables)
+        private static string BuildCode(string code, ICodeBuilder codeBuilder, string[] usings, params Variable[] variables)
         {
             code = ProcessTextOutputs(code, codeBuilder.WrapAsPlainTextOutputStatement);
             code = ProcessExpressionOutputs(code, codeBuilder.WrapAsExpressionOutput);
@@ -42,7 +42,7 @@
             code = ProcessConditionExpressions(code, codeBuilder.WrapAsConditionExpression);
             code = ProcessCodeBlocks(code);
             code = codeBuilder.WrapAsMethod(code, variables);
-            code = codeBuilder.WrapAsProgram(code);
+            code = codeBuilder.WrapAsProgram(code, usings);
             return code;
         }
 
