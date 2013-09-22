@@ -12,7 +12,7 @@
 
         private readonly IScript script;
 
-        public Template(IProgrammingLanguage language, string templateCode, string[] usings)
+        public Template(IProgrammingLanguage language, string templateCode, string[] usings, params Variable[] variables)
         {
             if (!IsBracketsCorresponding(templateCode))
             {
@@ -30,18 +30,18 @@
                 throw new ArgumentNullException("language");
             }
 
-            var code = BuildCode(templateCode, language.GetCodeBuilder());
+            var code = BuildCode(templateCode, language.GetCodeBuilder(), variables);
             this.script = language.Compile(code);
         }
 
-        private static string BuildCode(string code, ICodeBuilder codeBuilder)
+        private static string BuildCode(string code, ICodeBuilder codeBuilder, params Variable[] variables)
         {
             code = ProcessTextOutputs(code, codeBuilder.WrapAsPlainTextOutputStatement);
             code = ProcessExpressionOutputs(code, codeBuilder.WrapAsExpressionOutput);
             code = ProcessRepeatExpressions(code, codeBuilder.WrapAsRepeatExpression);
             code = ProcessConditionExpressions(code, codeBuilder.WrapAsConditionExpression);
             code = ProcessCodeBlocks(code);
-            code = codeBuilder.WrapAsMethod(code);
+            code = codeBuilder.WrapAsMethod(code, variables);
             code = codeBuilder.WrapAsProgram(code);
             return code;
         }
@@ -140,9 +140,9 @@
             this.script.Dispose();
         }
 
-        public void Render(TextWriter output)
+        public void Render(TextWriter output, params object[] values)
         {
-            this.script.Run(output);
+            this.script.Run(output, values);
         }
     }
 }

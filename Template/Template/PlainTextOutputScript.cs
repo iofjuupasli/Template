@@ -11,7 +11,7 @@
             this.text = text;
         }
 
-        public void Run(TextWriter output)
+        public void Run(TextWriter output, params object[] values)
         {
             output.Write(this.text);
         }

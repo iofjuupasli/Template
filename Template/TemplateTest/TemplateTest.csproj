@@ -60,6 +60,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BracketNotCorrespondingTest.cs" />
+    <Compile Include="EchoLanguageStub.cs" />
     <Compile Include="MockLanguageBuilder.cs" />
     <Compile Include="TemplateTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

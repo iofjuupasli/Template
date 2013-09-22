@@ -27,31 +27,16 @@
             var variable = new Variable("varName", type);
             var templateText = "[%code;%]text";
 
-            const string ProgramStructure = "begin {0} end";
-            const string ExpressionOutputStructure = "output({0});";
-            const string OutputStatementStructure = @"output(""{0}"");";
-            const string MethodStructure = "method({1}){{ {0} }}";
-            var typeMapping = new Dictionary<ArgumentType, string>
-                    {
-                        { type, "anyType" }
-                    };
-
-            var echoLanguage = new MockLanguageBuilder()
-                    .WithProgramWrapper(ProgramStructure)
-                    .WithMethodWrapper(MethodStructure)
-                    .WithPlainTextWrapper(OutputStatementStructure)
-                    .WithTypeMapping(typeMapping)
-                    .OutputSelfCode()
-                    .GetObject();
+            var echoLanguage = new EchoLanguageStub();
 
             // act
             using (var template = new Template(echoLanguage, templateText, null, variable))
             using (var output = new StringWriter())
             {
-                template.Render(output);
+                template.Render(output, value);
 
                 // assert
-                var expected = "begin method(anyType varName){ code;output(\"text\"); } end";
+                var expected = "begin method(" + echoLanguage.GetCodeBuilder().ConvertType(type) + " varName){ code;output(\"text\"); } end";
                 Assert.Equal(expected, output.ToString());
                 
             }

@@ -1,6 +1,8 @@
 ﻿namespace TemplateTest
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using Moq;
 
@@ -29,8 +31,15 @@
 
         public MockLanguageBuilder WithMethodWrapper(string methodStructure)
         {
-            this.codeBuilderMock.Setup<string>(builder => builder.WrapAsMethod(It.IsAny<string>()))
-                .Returns<string>(methodBody => String.Format(methodStructure, methodBody));
+            this.codeBuilderMock.Setup<string>(builder => builder.WrapAsMethod(It.IsAny<string>(), It.IsAny<Variable[]>()))
+                .Returns<string, Variable[]>(
+                    (methodBody, variables) => variables.Any()
+                        ? String.Format(
+                            methodStructure,
+                            methodBody,
+                            String.Join(", ",
+                                variables.Select(variable => String.Format("{0} {1}", variable.Type, variable.Name))))
+                        : String.Format(methodStructure, methodBody));
             return this;
         }
 
@@ -71,6 +80,13 @@
                 builder => builder.WrapAsConditionExpression(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns<string, string>(
                     (condition, onTrue) => String.Format(conditionStructure, condition, onTrue));
+            return this;
+        }
+
+        public MockLanguageBuilder WithTypeMapping(Dictionary<ArgumentType, string> typeMapping)
+        {
+            this.codeBuilderMock.Setup<string>(builder => builder.ConvertType(It.IsAny<ArgumentType>()))
+                .Returns<ArgumentType>(type => typeMapping[type]);
             return this;
         }
 

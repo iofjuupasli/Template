@@ -5,6 +5,6 @@
 
     public interface IScript : IDisposable
     {
-        void Run(TextWriter output);
+        void Run(TextWriter output, params object[] values);
     }
 }
