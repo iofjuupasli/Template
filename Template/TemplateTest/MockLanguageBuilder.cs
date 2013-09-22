@@ -65,21 +65,31 @@
             return this;
         }
 
-        public MockLanguageBuilder WithRepeatWrapper(string repeatStructure)
+        public MockLanguageBuilder WithRepeatWrapper(string openRepeatStructure, string closeRepeatStructure)
         {
             this.codeBuilderMock.Setup(
-                builder => builder.WrapAsRepeatExpression(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns<string, string>(
-                    (expression, toRepeat) => String.Format(repeatStructure, expression, toRepeat));
+                builder => builder.OpenRepeatExpression(It.IsAny<string>()))
+                .Returns<string>(
+                    expression => String.Format(openRepeatStructure, expression));
+
+            this.codeBuilderMock.Setup(
+                builder => builder.CloseRepeatExpression())
+                .Returns(closeRepeatStructure);
+
             return this;
         }
 
-        public MockLanguageBuilder WithConditionWrapper(string conditionStructure)
+        public MockLanguageBuilder WithConditionWrapper(string openConditionStructure, string closeConditionStructure)
         {
             this.codeBuilderMock.Setup(
-                builder => builder.WrapAsConditionExpression(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns<string, string>(
-                    (condition, onTrue) => String.Format(conditionStructure, condition, onTrue));
+                builder => builder.OpenConditionExpression(It.IsAny<string>()))
+                .Returns<string>(
+                    condition => String.Format(openConditionStructure, condition));
+
+            this.codeBuilderMock.Setup(
+                builder => builder.CloseConditionExpression())
+                .Returns(closeConditionStructure);
+
             return this;
         }
 

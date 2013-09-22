@@ -47,21 +47,31 @@ namespace TemplateTest
                 methodBody);
         }
 
+        public string OpenRepeatExpression(string repeatCountExpression)
+        {
+            return String.Format("for(var i = 0; i < {0}; i++){{", repeatCountExpression);
+        }
+
+        public string CloseRepeatExpression()
+        {
+            return "}";
+        }
+
+        public string OpenConditionExpression(string conditionExpression)
+        {
+            return String.Format("if({0}){{", conditionExpression);
+        }
+
+        public string CloseConditionExpression()
+        {
+            return "}";
+        }
+
         public string WrapAsExpressionOutput(string expression)
         {
             return String.Format("output({0});", expression);
         }
-
-        public string WrapAsRepeatExpression(string expression, string codeToRepeat)
-        {
-            return String.Format("for(var i = 0; i < {0}; i++){{{1}}}", expression, codeToRepeat);
-        }
-
-        public string WrapAsConditionExpression(string condition, string codeOnTrue)
-        {
-            return String.Format("if({0}){{{1}}}", condition, codeOnTrue);
-        }
-
+        
         public string ConvertType(ArgumentType type)
         {
             return "My" + type;

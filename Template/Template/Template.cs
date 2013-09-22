@@ -3,6 +3,7 @@
     using System;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
 
     public class Template : IDisposable
@@ -36,23 +37,128 @@
                 variables = vars.ToArray();
             }
 
-            var code = BuildCode(templateCode, language.GetCodeBuilder(), usings, variables);
+            var code = new TemplateCodeBuilder(language.GetCodeBuilder(), templateCode, usings, variables).BuildCode();
             this.script = language.Compile(code);
         }
 
+        private class TemplateCodeBuilder
+        {
+            private readonly ICodeBuilder codeBuilder;
+
+            private string templateCode;
+
+            private readonly string[] usings;
+
+            private readonly Variable[] variables;
+
+            public TemplateCodeBuilder(ICodeBuilder codeBuilder, string templateCode, string[] usings, params Variable[] variables)
+            {
+                this.codeBuilder = codeBuilder;
+                this.templateCode = templateCode;
+                this.usings = usings;
+                this.variables = variables;
+            }
+
+            public override string ToString()
+            {
+                return this.BuildCode();
+            }
+
+            public string BuildCode()
+            {
+                ProcessTextOutputs();
+                ProcessExpressionOutputs();
+                ProcessRepeatExpressions();
+                ProcessConditionExpressions();
+
+                RemoveCodeBrackets();
+                AsMethod();
+                AsProgram();
+
+                return this.templateCode;
+            }
+
+            private void ProcessTextOutputs()
+            {
+                this.templateCode = Regex.Replace(
+                    this.templateCode,
+                    @"(?:(?<=\A).*?(?=\[%))|(?:(?<=%\]).*?(?=\[%))|(?:(?!.*%\])(?!\]).*(?=\Z))",
+                    match => String.IsNullOrEmpty(match.Value) 
+                        ? String.Empty
+                        : String.Format("[%{0}%]", this.codeBuilder.WrapAsPlainTextOutputStatement(match.Value)),
+                    RegexOptions.Singleline);
+            }
+
+            private void ProcessExpressionOutputs()
+            {
+                this.templateCode = Regex.Replace(
+                    this.templateCode,
+                    @"\[%=(.*?)%\]",
+                    match => String.IsNullOrEmpty(match.Groups[1].Value) 
+                        ? String.Empty 
+                        : codeBuilder.WrapAsExpressionOutput(match.Groups[1].Value),
+                    RegexOptions.Singleline);
+            }
+
+            private void ProcessRepeatExpressions()
+            {
+                this.templateCode = Regex.Replace(
+                    this.templateCode,
+                    @"\[%\@(?!%)(.*?)%\]",
+                    match => this.codeBuilder.OpenRepeatExpression(match.Groups[1].Value),
+                    RegexOptions.Singleline);
+
+                this.templateCode = Regex.Replace(
+                    this.templateCode,
+                    @"\[%\@%\]",
+                    match => this.codeBuilder.CloseRepeatExpression(),
+                    RegexOptions.Singleline);
+            }
+
+            private void ProcessConditionExpressions()
+            {
+                this.templateCode = Regex.Replace(
+                    this.templateCode,
+                    @"\[%\?(?!%)(.*?)%\]",
+                    match => this.codeBuilder.OpenConditionExpression(match.Groups[1].Value),
+                    RegexOptions.Singleline);
+
+                this.templateCode = Regex.Replace(
+                    this.templateCode,
+                    @"\[%\?%\]",
+                    match => this.codeBuilder.CloseConditionExpression(),
+                    RegexOptions.Singleline);
+            }
+
+            private void RemoveCodeBrackets()
+            {
+                this.templateCode = this.templateCode.Replace("[%", String.Empty).Replace("%]", String.Empty);
+            }
+
+            private void AsMethod()
+            {
+                this.templateCode = this.codeBuilder.WrapAsMethod(this.templateCode, variables);
+            }
+
+            private void AsProgram()
+            {
+                this.templateCode = this.codeBuilder.WrapAsProgram(this.templateCode, usings);
+            }
+        }
+/*
         private static string BuildCode(string code, ICodeBuilder codeBuilder, string[] usings, params Variable[] variables)
         {
             code = ProcessTextOutputs(code, codeBuilder.WrapAsPlainTextOutputStatement);
-            code = ProcessExpressionOutputs(code, codeBuilder.WrapAsExpressionOutput);
-            code = ProcessRepeatExpressions(code, codeBuilder.WrapAsRepeatExpression);
-            code = ProcessConditionExpressions(code, codeBuilder.WrapAsConditionExpression);
+            code = ProcessExpressionOutputs(code, codeBuilder);
+            code = ProcessRepeatExpressions(code, codeBuilder);
+            code = ProcessConditionExpressions(code, codeBuilder);
             code = ProcessCodeBlocks(code);
             code = codeBuilder.WrapAsMethod(code, variables);
             code = codeBuilder.WrapAsProgram(code, usings);
             return code;
         }
 
-        private static string ProcessConditionExpressions(string code, Func<string, string, string> conditionWrapper)
+        private static string ProcessConditionExpressions(string code, ICodeBuilder codeBuilder)
         {
             return Regex.Replace(
                 code,
@@ -64,7 +170,7 @@
                 RegexOptions.Singleline);
         }
 
-        private static string ProcessRepeatExpressions(string code, Func<string, string, string> repeatExpressionWrapper)
+        private static string ProcessRepeatExpressions(string code, ICodeBuilder codeBuilder)
         {
             return Regex.Replace(
                 code,
@@ -76,12 +182,12 @@
                 RegexOptions.Singleline);
         }
 
-        private static string ProcessExpressionOutputs(string code, Func<string, string> expressionWrapper)
+        private static string ProcessExpressionOutputs(string code, ICodeBuilder codeBuilder)
         {
             return Regex.Replace(
                 code,
                 @"\[%=(.*?)%\]",
-                match => String.IsNullOrEmpty(match.Groups[1].Value) ? String.Empty : expressionWrapper(match.Groups[1].Value),
+                match => String.IsNullOrEmpty(match.Groups[1].Value) ? String.Empty : codeBuilder.WrapAsExpressionOutput(match.Groups[1].Value),
                 RegexOptions.Singleline);
         }
 
@@ -97,7 +203,7 @@
                 @"(?:(?<=\A).*?(?=\[%))|(?:(?<=%\]).*?(?=\[%))|(?:(?!.*%\])(?!\]).*(?=\Z))",
                 match => String.IsNullOrEmpty(match.Value) ? String.Empty : wrapper(match.Value),
                 RegexOptions.Singleline);
-        }
+        }*/
 
         private static bool IsBracketsCorresponding(string templateCode)
         {

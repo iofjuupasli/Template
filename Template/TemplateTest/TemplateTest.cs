@@ -171,20 +171,20 @@
             }
         }
 
-        [Theory]
-        [InlineData("", "", "", "")]
-        [InlineData("before", "expression", "toRepeat", "after")]
-        [InlineData("before", "", "toRepeat", "after")]
-        [InlineData("before", "expression", "", "after")]
-        public void RepeatExpression(
-                string textBefore, string repeatCountExpression, string textToRepeat, string textAfter)
+        [Fact]
+        public void RepeatExpression()
         {
+            const string TextBefore = "before";
+            const string RepeatCountExpression = "expression";
+            const string TextToRepeat = "toRepeat";
+            const string TextAfter = "after";
             // arrange
             var templateText = String.Format(@"{0}[%@{1}%]{2}[%@%]{3}",
-                    textBefore, repeatCountExpression, textToRepeat, textAfter);
+                    TextBefore, RepeatCountExpression, TextToRepeat, TextAfter);
 
             const string ProgramStructure = "begin {0} end";
-            const string RepeatStructure = "for(var i = 0; i < {0}; i++){{{1}}}";
+            const string OpenRepeatStructure = "for(var i = 0; i < {0}; i++){{";
+            const string CloseRepeatStructure = "}";
             const string OutputStatementStructure = @"output(""{0}"");";
             const string MethodStructure = "method{{ {0} }}";
 
@@ -192,7 +192,7 @@
                     .WithProgramWrapper(ProgramStructure)
                     .WithMethodWrapper(MethodStructure)
                     .WithPlainTextWrapper(OutputStatementStructure)
-                    .WithRepeatWrapper(RepeatStructure)
+                    .WithRepeatWrapper(OpenRepeatStructure, CloseRepeatStructure)
                     .OutputSelfCode()
                     .GetObject();
 
@@ -201,33 +201,27 @@
             using (var output = new StringWriter())
             {
                 template.Render(output);
-                var toRepeat = (String.IsNullOrEmpty(textToRepeat) ? "" : String.Format(OutputStatementStructure, textToRepeat));
+                
                 // assert
-                var body = (String.IsNullOrEmpty(textBefore) ? "" : String.Format(OutputStatementStructure, textBefore))
-                        + (String.IsNullOrEmpty(repeatCountExpression) || String.IsNullOrEmpty(toRepeat) ? "" : String.Format(RepeatStructure, repeatCountExpression, toRepeat))
-                        + (String.IsNullOrEmpty(textAfter) ? "" : String.Format(OutputStatementStructure, textAfter));
-
-                var method = String.Format(MethodStructure, body);
-                var code = String.Format(ProgramStructure, method);
-
-                Assert.Equal(code, output.ToString());
+                const string Expected = "begin method{ output(\"before\");for(var i = 0; i < expression; i++){output(\"toRepeat\");}output(\"after\"); } end";
+                Assert.Equal(Expected, output.ToString());
             }
         }
 
-        [Theory]
-        [InlineData("", "", "", "")]
-        [InlineData("before", "expression", "on true", "after")]
-        [InlineData("before", "", "on true", "after")]
-        [InlineData("before", "expression", "", "after")]
-        public void ConditionExpression(
-                string textBefore, string conditionExpression, string textOnTrue, string textAfter)
+        [Fact]
+        public void ConditionExpression()
         {
+            const string TextBefore = "before";
+            const string ConditionExpression = "expression";
+            const string TextOnTrue = "on true";
+            const string TextAfter = "after";
             // arrange
             var templateText = String.Format(@"{0}[%?{1}%]{2}[%?%]{3}",
-                    textBefore, conditionExpression, textOnTrue, textAfter);
+                    TextBefore, ConditionExpression, TextOnTrue, TextAfter);
 
             const string ProgramStructure = "begin {0} end";
-            const string ConditionStructure = "if({0}){{{1}}}";
+            const string OpenCoditionStructure = "if({0}){{";
+            const string CloseConditionStructure = "}";
             const string OutputStatementStructure = @"output(""{0}"");";
             const string MethodStructure = "method{{ {0} }}";
 
@@ -235,7 +229,7 @@
                     .WithProgramWrapper(ProgramStructure)
                     .WithMethodWrapper(MethodStructure)
                     .WithPlainTextWrapper(OutputStatementStructure)
-                    .WithConditionWrapper(ConditionStructure)
+                    .WithConditionWrapper(OpenCoditionStructure, CloseConditionStructure)
                     .OutputSelfCode()
                     .GetObject();
 
@@ -244,16 +238,10 @@
             using (var output = new StringWriter())
             {
                 template.Render(output);
-                var onTrue = (String.IsNullOrEmpty(textOnTrue) ? "" : String.Format(OutputStatementStructure, textOnTrue));
+                
                 // assert
-                var body = (String.IsNullOrEmpty(textBefore) ? "" : String.Format(OutputStatementStructure, textBefore))
-                        + (String.IsNullOrEmpty(conditionExpression) || String.IsNullOrEmpty(onTrue) ? "" : String.Format(ConditionStructure, conditionExpression, onTrue))
-                        + (String.IsNullOrEmpty(textAfter) ? "" : String.Format(OutputStatementStructure, textAfter));
-
-                var method = String.Format(MethodStructure, body);
-                var code = String.Format(ProgramStructure, method);
-
-                Assert.Equal(code, output.ToString());
+                const string Expected = "begin method{ output(\"before\");if(expression){output(\"on true\");}output(\"after\"); } end";
+                Assert.Equal(Expected, output.ToString());
             }
         }
 

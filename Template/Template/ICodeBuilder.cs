@@ -10,9 +10,13 @@
 
         string WrapAsExpressionOutput(string expression);
 
-        string WrapAsRepeatExpression(string expression, string codeToRepeat);
+        string OpenRepeatExpression(string repeatCountExpression);
 
-        string WrapAsConditionExpression(string condition, string codeOnTrue);
+        string CloseRepeatExpression();
+
+        string OpenConditionExpression(string conditionExpression);
+
+        string CloseConditionExpression();
 
         string ConvertType(ArgumentType type);
     }
